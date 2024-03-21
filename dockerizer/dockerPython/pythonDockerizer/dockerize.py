@@ -59,3 +59,19 @@ CMD [ "python", "{entrypoint}.py" ]
 
     logger.info(f"Created Dockerfile: {filename}")
     logger.info(f"Created Dockerfile: {dockerfile_content}")
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Generate Dockerfile')
+    parser.add_argument('--entrypoint', type=str, help='Name of the entrypoint file', required=True)
+    parser.add_argument('--version', type=str, default='latest', help='Python version (default: latest)')
+    parser.add_argument('--filename', type=str, default='Dockerfile',
+                        help='Name of the Dockerfile (default: Dockerfile)')
+    parser.add_argument('--port', type=int, default=80, help='Exposed port for the Dockerfile (default: 80)')
+    parser.add_argument('--dest_path', type=str, default='./', help='Destination path for the Dockerfile (default: ./)')
+
+    args = parser.parse_args()
+
+    create_docker_file(args.entrypoint, args.version, args.filename, args.port, args.dest_path)

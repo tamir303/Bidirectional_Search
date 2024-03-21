@@ -1,14 +1,22 @@
 import logging
 import subprocess
+from enum import Enum
 
 logger = logging.getLogger(__name__)
 
 
+class DefaultPaths(Enum):
+    VERSION = "latest"
+    FILENAME = "Dockerfile"
+    PORT = 80
+    DEST_PATH = "./"
+
+
 def create_docker_file(entrypoint: str,
-                       version: str = "latest",
-                       filename: str = "Dockerfile",
-                       port: int = 80,
-                       dest_path: str = "./") -> None:
+                       version: str = DefaultPaths.VERSION,
+                       filename: str = DefaultPaths.FILENAME,
+                       port: int = DefaultPaths.PORT,
+                       dest_path: str = DefaultPaths.DEST_PATH) -> None:
     """
     Creates a Dockerfile based on a Python version and dependency list.
 
@@ -66,11 +74,13 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Generate Dockerfile')
     parser.add_argument('--entrypoint', type=str, help='Name of the entrypoint file', required=True)
-    parser.add_argument('--version', type=str, default='latest', help='Python version (default: latest)')
-    parser.add_argument('--filename', type=str, default='Dockerfile',
+    parser.add_argument('--version', type=str, default=DefaultPaths.VERSION, help='Python version (default: latest)')
+    parser.add_argument('--filename', type=str, default=DefaultPaths.FILENAME,
                         help='Name of the Dockerfile (default: Dockerfile)')
-    parser.add_argument('--port', type=int, default=80, help='Exposed port for the Dockerfile (default: 80)')
-    parser.add_argument('--dest_path', type=str, default='./', help='Destination path for the Dockerfile (default: ./)')
+    parser.add_argument('--port', type=int, default=DefaultPaths.PORT, help='Exposed port for the Dockerfile ('
+                                                                            'default: 80)')
+    parser.add_argument('--dest_path', type=str, default=DefaultPaths.DEST_PATH, help='Destination path for the '
+                                                                                      'Dockerfile (default: ./)')
 
     args = parser.parse_args()
 

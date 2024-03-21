@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to Black and White Converter</title>
+    <style>
+        #drop-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        canvas {
+            max-width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="drop-area" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+    <p>Drop images here to convert to black and white</p>
+    <input type="file" id="file-input" multiple style="display: none;" onchange="handleFiles(this.files)">
+</div>
+
+<canvas id="output-canvas" style="display: none;"></canvas>
+
+<script>
+    function dragOverHandler(event) {
+        event.preventDefault();
+        event.target.style.backgroundColor = "#e0f7fa";
+    }
+
+    function dropHandler(event) {
+        event.preventDefault();
+        event.target.style.backgroundColor = "";
+
+        const files = event.dataTransfer.files;
+        handleFiles(files);
+    }
+
+    function handleFiles(files) {
+        const canvas = document.getElementById("output-canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.style.display = "block";
+
+        for (const file of files) {
+            if (file.type.startsWith("image/")) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch('/convert', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    const img = new Image();
+                    img.unload = function () {
+                        ctx.clearRect(0, 0, canvas.width, canvas. Height);
+                        canvas.Width = img.width;
+                        canvas. Height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                    };
+
+                    const blobUrl = URL.createObjectURL(blob);
+                    img.src = blobUrl;
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

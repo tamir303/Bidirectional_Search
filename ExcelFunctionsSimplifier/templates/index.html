@@ -33,12 +33,13 @@
 <script>
     function dragOverHandler(event) {
         event.preventDefault();
-        event.target.style.backgroundColor = "#e0f7fa";
+        event.dataTransfer.dropEffect = "copy";
+        document.getElementById('drop-area').style.backgroundColor = "#e0f7fa";
     }
 
     function dropHandler(event) {
         event.preventDefault();
-        event.target.style.backgroundColor = "";
+        document.getElementById('drop-area').style.backgroundColor = "";
 
         const files = event.dataTransfer.files;
         handleFiles(files);
@@ -54,24 +55,25 @@
                 const formData = new FormData();
                 formData.append('file', file);
 
-                fetch('/convert', {
-                    method: 'POST',
-                    body: formData,
-                })
-                .then(response => response.blob())
-                .then(blob => {
-                    const img = new Image();
-                    img.unload = function () {
-                        ctx.clearRect(0, 0, canvas.width, canvas. Height);
-                        canvas.Width = img.width;
-                        canvas. Height = img.height;
-                        ctx.drawImage(img, 0, 0);
-                    };
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/convert', true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        const blob = xhr.response;
+                        const img = new Image();
+                        img.onload = function () {
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            ctx.drawImage(img, 0, 0);
+                        };
 
-                    const blobUrl = URL.createObjectURL(blob);
-                    img.src = blobUrl;
-                })
-                .catch(error => console.error('Error:', error));
+                        const blobUrl = URL.createObjectURL(blob);
+                        img.src = blobUrl;
+                    }
+                };
+                xhr.responseType = 'blob';
+                xhr.send(formData);
             }
         }
     }
